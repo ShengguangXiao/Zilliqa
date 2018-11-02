@@ -14,53 +14,25 @@
 # are governed by GPLv3.0 are those programs that are located in the folders
 # src/depends and tests/depends and which include a reference to GPLv3 in their
 # program files.
+
+# This Dockerfile provides a standard environment for CI
 #
-ARG BASE=ubuntu:16.04
-FROM ${BASE}
+# It includes dependencies and tools
+# * that are necessary for style checking, code coverage in CI
+# * that are too heavy to be installed during CI
+# * that are common and not subject to frequent change
+#
+# It should not include
+# * things are specific to commit (they should go to scripts/ci_install_deps.sh
 
-# Format guideline: one package per line and keep them alphabetically sorted
+FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    curl \
     ca-certificates \
-    cmake \
-    git \
-    golang \
-    libboost-filesystem-dev \
-    libboost-system-dev \
-    libboost-test-dev \
-    libcurl4-openssl-dev \
-    libevent-dev \
-    libjsoncpp-dev \
-    libjsonrpccpp-dev \
-    libjsonrpccpp-dev \
-    libleveldb-dev \
-    libmicrohttpd-dev \
-    libminiupnpc-dev \
-    libprotobuf-dev \
-    libsnappy-dev \
-    libssl-dev \
-    ocl-icd-opencl-dev \
-    protobuf-compiler \
-    python \
-    python-pip \
+    && echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list.d/llvm.list \
+    && echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list.d/llvm.list \
+    && curl https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    clang-format-7 \
+    clang-tidy-7 \
     && rm -rf /var/lib/apt/lists/*
-
-# Intentionally left blank unless specific commit is provided in commandline
-ARG COMMIT=
-ARG REPO=https://github.com/Zilliqa/Zilliqa.git
-ARG SOURCE_DIR=/zilliqa
-ARG BUILD_DIR=/build
-ARG INSTALL_DIR=/usr/local
-ARG BUILD_TYPE=RelWithDebInfo
-
-RUN git clone --recursive ${REPO} ${SOURCE_DIR} \
-    && git -C ${SOURCE_DIR} checkout ${COMMIT} \
-    && cmake -H${SOURCE_DIR} -B${BUILD_DIR} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-    && cmake --build ${BUILD_DIR} -- -j$(nproc) \
-    && cmake --build ${BUILD_DIR} --target install \
-    && rm -rf ${BUILD_DIR}
-
-ENV LD_LIBRARY_PATH=${INSTALL_DIR}/lib
-
-ENTRYPOINT ["/bin/bash"]
