@@ -189,10 +189,9 @@ bool Node::OnNodeMissingTxns(const bytes& errorMsg, const unsigned int offset,
 
   std::vector<Transaction> txns;
 
-  const std::unordered_map<TxnHash, TransactionWithReceipt>&
-      processedTransactions = (epochNum == m_mediator.m_currentEpochNum)
-                                  ? t_processedTransactions
-                                  : m_processedTransactions[epochNum];
+  const auto& processedTransactions = (epochNum == m_mediator.m_currentEpochNum)
+                                          ? t_processedTransactions
+                                          : m_processedTransactions[epochNum];
 
   for (const auto& hash : missingTransactions) {
     // LOG_GENERAL(INFO, "Peer " << from << " : " << portNo << " missing txn "
@@ -675,9 +674,7 @@ void Node::ProcessTransactionWhenShardBackup(
   ReinstateMemPool(t_addrNonceTxnMap, gasLimitExceededTxnBuffer);
 }
 
-void Node::PutTxnsInTempDataBase(
-    const std::unordered_map<TxnHash, TransactionWithReceipt>&
-        processedTransactions) {
+void Node::PutTxnsInTempDataBase(const TxnHashToTxnMap& processedTransactions) {
   for (const auto& hashTxnPair : processedTransactions) {
     bytes serializedTxn;
     hashTxnPair.second.Serialize(serializedTxn, 0);
@@ -686,9 +683,7 @@ void Node::PutTxnsInTempDataBase(
   }
 }
 
-void Node::SaveTxnsToS3(
-    const std::unordered_map<TxnHash, TransactionWithReceipt>&
-        processedTransactions) {
+void Node::SaveTxnsToS3(const TxnHashToTxnMap& processedTransactions) {
   ostringstream oss;
   oss << "/tmp/txns_shard_" << m_myshardId << "_txblk_"
       << m_mediator.m_currentEpochNum;

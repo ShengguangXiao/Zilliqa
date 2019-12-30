@@ -118,7 +118,6 @@ BOOST_AUTO_TEST_CASE(testTRDeserializationFromFile) {
   // checking if serialization and deserialization of TransactionWithReceipt
   // to/from file is working or not
 
-  std::unordered_map<TxnHash, TransactionWithReceipt> txns;
   TransactionWithReceipt tx_body = constructDummyTxBody(0);
   auto tx_hash = tx_body.GetTransaction().GetTranID();
 

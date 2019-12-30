@@ -81,6 +81,9 @@ class TransactionReceipt : public SerializableDataBlock {
   void update();
 };
 
+class TransactionWithReceipt;
+using TxnHashToTxnMap = std::unordered_map<TxnHash, TransactionWithReceipt>;
+
 class TransactionWithReceipt : public SerializableDataBlock {
   Transaction m_transaction;
   TransactionReceipt m_tranReceipt;
@@ -121,8 +124,7 @@ class TransactionWithReceipt : public SerializableDataBlock {
   }
 
   static bool ComputeTransactionReceiptsHash(
-      const std::vector<TxnHash>& txnOrder,
-      std::unordered_map<TxnHash, TransactionWithReceipt>& txrs,
+      const std::vector<TxnHash>& txnOrder, TxnHashToTxnMap& txrs,
       TxnHash& trHash) {
     std::vector<TransactionWithReceipt> vec;
 

@@ -44,8 +44,8 @@
 class Mediator;
 class Retriever;
 
-typedef std::unordered_map<uint64_t, std::vector<std::pair<BlockHash, TxnHash>>>
-    UnavailableMicroBlockList;
+using UnavailableMicroBlockList =
+    std::unordered_map<uint64_t, std::vector<std::pair<BlockHash, TxnHash>>>;
 
 /// Implements PoW submission and sharding node functionality.
 class Node : public Executable {
@@ -128,10 +128,8 @@ class Node : public Executable {
 
   std::vector<TxnHash> m_expectedTranOrdering;
   std::mutex m_mutexProcessedTransactions;
-  std::unordered_map<uint64_t,
-                     std::unordered_map<TxnHash, TransactionWithReceipt>>
-      m_processedTransactions;
-  std::unordered_map<TxnHash, TransactionWithReceipt> t_processedTransactions;
+  std::unordered_map<uint64_t, TxnHashToTxnMap> m_processedTransactions;
+  TxnHashToTxnMap t_processedTransactions;
   // operates under m_mutexProcessedTransaction
   std::vector<TxnHash> m_TxnOrder;
 
@@ -674,12 +672,9 @@ class Node : public Executable {
   std::atomic<NodeState> m_fallbackState{};
   bool ValidateFallbackState(NodeState nodeState, NodeState statePropose);
 
-  void PutTxnsInTempDataBase(
-      const std::unordered_map<TxnHash, TransactionWithReceipt>&
-          processedTransactions);
+  void PutTxnsInTempDataBase(const TxnHashToTxnMap& processedTransactions);
 
-  void SaveTxnsToS3(const std::unordered_map<TxnHash, TransactionWithReceipt>&
-                        processedTransactions);
+  void SaveTxnsToS3(const TxnHashToTxnMap& processedTransactions);
 
   std::string GetAwsS3CpString(const std::string& uploadFilePath);
 };

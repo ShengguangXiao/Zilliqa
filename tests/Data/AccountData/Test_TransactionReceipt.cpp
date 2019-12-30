@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(transactionwithreceipt) {
       hash == TransactionWithReceipt::ComputeTransactionReceiptsHash(txrs));
 
   std::vector<TxnHash> txnOrder;
-  std::unordered_map<TxnHash, TransactionWithReceipt> twr_map;
+  TxnHashToTxnMap twr_map;
   TxnHash th_out;
   TxnHash th;
 
